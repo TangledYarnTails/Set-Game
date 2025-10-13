@@ -567,9 +567,9 @@ let deck =[
 let selectedCards =[] //3 cards that were clicked on
 let board = []; //12 or 15 cards on the board (3x4 grid)
 let takenCards =[]; // cards that were verified that are no longer playable
-let points; // player's points, 1 set = 1 point, 1 wrong set = -1point
+let points = 0; // player's points, 1 set = 1 point, 1 wrong set = -1point
 let initial = true; // initial deal is 12 cards, otherwise just 3
-const cardNodeList = document.querySelectorAll(".card"); //get all card elements
+const cardNodeList = document.querySelectorAll(".card"); //get all card elements on board
 
 
 function dealCards(){ //takes cards from deck and adds them to board array
@@ -579,7 +579,7 @@ let x = 0;
 let chosen;
 while(x < 12){
     chosen = Math.floor((Math.random() * deck.length ))
-console.log(chosen)
+//console.log(chosen)
     board.push(deck[chosen]) //random index values from 0 to 81
 deck.splice(chosen, 1) // removes one random object from the deck
 initial = false;
@@ -589,43 +589,91 @@ x++;
 
 }else{
 //take a random index from the deck 3 times and add it to the board array
-while(x > 3){
-chosen = (int)(Math.random() * deck.length )
+for(let i=0; i < 3; i++){
+chosen = Math.floor((Math.random() * deck.length ))
 board.push(deck[chosen]) //random index values from 0 to 81
 deck.splice(chosen, 1) // removes one random object from the deck
 console.log("Currently on the board: " + board)
 console.log("Deck Length: " + deck.length)
-x++;
+
 }
 }
 
 };
-function assignBoard(){
+function assignBoard(){ //displays cards on html
    for(let i=0 ; i < board.length ; i++){
     let x=0;
     let childArray =  Array.from(cardNodeList[i].children); // one two three
     while (x < board[i].number){
        childArray[x].style.display ="flex";
-       childArray[x].classList.add(board[i].shape);
-
-       if(board[i].pattern == "striped"){
-       childArray[x].style.background = `repeating-linear-gradient(0deg, var(--${board[i].color}), var(--${board[i].color}) 10px, #ffffff 10px, #ffffff 20px)`;
+       childArray[x].classList.add(board[i].shape, board[i].pattern);
+       childArray[x].style.setProperty('--this-card-color', `var(--${board[i].color})`);
+       cardNodeList[i].setAttribute('id', board[i].name);
     
-       } else if(board[i].pattern == "outline"){
-        childArray[x].style.border = `5px solid ${board[i].color}`
-         childArray[x].style.backgroundColor = "#ffffff";
-       }else{
-        childArray[x].style.backgroundColor = `var(--${board[i].color})`;
-       }
-       
-       console.log(board[i].number);
-       console.log(childArray[x]); 
 x++;
     }
     x= 0;
 }   
 };
-//adds the clicked on cards to the array of selected cards
+
+
+function removeValidSet(takenArr){
+  for (let x=0; x<board.length ;x++){ //length = 12
+    let childrenArr = Array.from(cardNodeList[x].children)
+    for(let i=0; i < takenArr.length ; i++){
+  if(board[x].name == takenArr[i].id){
+    let index =board.indexOf(takenArr[i].id)
+board.splice(index, 1)
+if (cardNodeList[x].id == takenArr[i].id){
+  for(let y=0 ; y<childrenArr.length; y++){
+    const classesToRemove = ['rhombus', 'pill','chevron','solid','striped','outline']
+    
+    for (const className of classesToRemove){
+      childrenArr[y].classList.remove(className);  
+    }
+childrenArr[y].style.display ='none';
+  }
+  cardNodeList[x].removeAttribute('id')
+}
+}
+    }
+  }
+  console.log(board.length)
+}
+function verifySet(){
+  
+//compare all three cards to each other
+// consider each characteristic one at a time
+//if two share a characteristic and the last one does not then it is not a set
+const cardZeroChildren = Array.from(selectedCards[0].children) // one two three;
+const cardOneChildren =Array.from(selectedCards[1].children) // one two three;
+const cardTwoChildren =Array.from(selectedCards[2].children) // one two three;
+
+if (
+  haveSameClassShape(cardZeroChildren[0],cardOneChildren[0]) == haveSameClassShape(cardZeroChildren[0],cardTwoChildren[0])&& // shape
+  haveSameClassPattern(cardZeroChildren[0],cardOneChildren[0]) == haveSameClassPattern(cardZeroChildren[0],cardTwoChildren[0])&&  //pattern
+  haveSameColor(cardZeroChildren[0],cardOneChildren[0]) == haveSameColor(cardZeroChildren[0],cardTwoChildren[0])&& //color
+  haveSameNumber(cardZeroChildren,cardOneChildren) == haveSameNumber(cardZeroChildren,cardTwoChildren)) { // number
+
+  console.log("This IS a set");
+    //console.log(cardZeroChildren[0].classList)
+    //  console.log(cardOneChildren[0].classList)
+      
+for(let i=0; i< 3 ; i++){
+takenCards.push(selectedCards[i]) // adds valid set to taken cards array
+//console.log(takenCards)
+  }
+  removeValidSet(takenCards);
+} else{
+    console.log("this is NOT a set");
+    for( let x=0; x <selectedCards.length; x++){
+      selectedCards[x].style.border = 'none';
+    }
+    selectedCards = [];
+    }
+}
+
+//adds the clicked on cards to the array of selected cards and verifies them
 function addToSelectedCardsArr(){
   cardNodeList.forEach(item => {
   item.addEventListener('click', () => {
@@ -634,58 +682,77 @@ function addToSelectedCardsArr(){
       item.style.border = "2px solid blue";
     }
      console.log(selectedCards);
+     verifySet();
   });
+  
+
+
+
 });
-}
-
-function verifySet(){
-//compare all three cards to each other
-// consider each characteristic one at a time
-//if two share a characteristic and the last one does not then it is not a set
-
-if (
-    selectedCards[0].shape == selectedCards[1].shape && selectedCards[0].shape != selectedCards[2].shape ||
-    selectedCards[0].pattern == selectedCards[1].pattern && selectedCards[0].pattern != selectedCards[2].pattern ||
-    selectedCards[0].color == selectedCards[1].color && selectedCards[0].color != selectedCards[2].color ||
-    selectedCards[0].number == selectedCards[1].number && selectedCards[0].number != selectedCards[2].number
-
-)
-    {
-    points-= 1;
-    console.log("NOT a set");
-} else{
-    console.log("this IS a set");
-    points+=1;
-    let i =0
-    while( i < 3){
-       takenCards.push(selectedCards[i])
-       selectedCards = [];
-       board.filter(getCard(selectedCards[i]))
-       board.splice(0,1);
-       console.log("this is the current board:"+ board)
-        i++;
-    }
-    if(board.length < 15 && deck.length > 2){
-    dealCards();
-    }
 
 }
+function haveSameClassShape(element1, element2){
+ const classList1 = element1.classList;
+  const classList2 = element2.classList;
+    const classShape = classList1[1];
+    // Check if the current class exists in the second element's class list
+    if (classList2[1] == classShape) {
+       return true// Found a common class
+    }else{
+ return false// No common classes found
+    }
+  
+}
+function haveSameClassPattern(element1, element2){
+ const classList1 = element1.classList;
+  const classList2 = element2.classList;
+    const classPattern = classList1[2];
+    // Check if the current class exists in the second element's class list
+    if (classList2[2]== classPattern) {
+  
+       return true// Found a common class
+    }else{
+ return false// No common classes found
+    }
+  
+}
+function haveSameColor(element1, element2){
+const color1 = element1.style.getPropertyValue('--this-card-color');
+const color2 = element2.style.getPropertyValue('--this-card-color');
+if (color1 == color2){
+  console.log(color1)
+  console.log(color2)
+  return true
+}else{
+  return false
+}
 
-};
-//is there at least one set in the board?
-function setsInBoard(){
-// is there at least one possible set on the board?
+}
+function haveSameNumber(array1, array2){
+  let totalDisplay1 = 0;
+  let totalDisplay2 = 0;
+for (let x=0; x< 3 ; x++){
+  if (array1[x].style.display == 'flex'){
+    totalDisplay1 +=1;
+  }
+   if (array2[x].style.display == 'flex'){
+    totalDisplay2 +=1;
+  }
+}
+if (totalDisplay1 == totalDisplay2){
+  return true
+}else{
+  return false
+}
+}
+function deselect(card){ //unfinished
+  let sIndex = selectedCards.indexOf(card)
+  selectedCards.splice(sIndex, 1);
+}
 
-
-
-// if no then deal cards
-};
 
 //function calls-----------------------------------------------
 dealCards();
-addToSelectedCardsArr();
-verifySet()
-//console.log(deck);
+addToSelectedCardsArr()
 
-console.log(board);
-//console.log ("card node list length " +cardNodeList.length)
+

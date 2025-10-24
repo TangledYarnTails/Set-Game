@@ -574,14 +574,53 @@ const playerPointsSpanElement = document.getElementById("points");
 const timerSpanElement = document.getElementById("timer");
 const foundCounterElement = document.getElementById("found");
 const addCardsElement = document.getElementById("add");
-const gridContainerElement = document.getElementsByClassName("board-Wrapper");
+const gridContainerElement = document.querySelector(".board-wrapper");
+//stats variables
 let setCounter = 0;
+const donughtChart = document.querySelector("#doughnut-chart");
+let identicalData = 0;
+let balancedData = 0;
+let singleData= 0 ;
+let rainbowData= 0;
+const endingChart = document.querySelector("#ending-chart");
+//sounds
+const validSound = document.getElementById("valid-sound");
+const invalidSound = document.getElementById("invalid-sound");
+const finishSound = document.getElementById("finish-sound");
+
+// rules popup stuff
+const ruleDialog = document.getElementById("rules");
+const goButton = document.getElementById("go");
+const overDialog = document.getElementById("game-over");
+const retryButton = document.getElementById("retry");
+
+ruleDialog.showModal();
+function closeRules(){
+  ruleDialog.close();
+  startTimer();
+}
+//quit button function
+function quitting(){
+  stopTimer();
+  finishSound.play();
+  lastChart.data.datasets[0].data =[identicalData, balancedData, singleData, rainbowData];
+lastChart.update();
+  overDialog.showModal();
+  
+}
+function retryGame(){
+  window.location.reload();
+}
+retryButton.addEventListener("click", retryGame);
+goButton.addEventListener("click",closeRules);
+
+
 function dealCards(){ //takes cards from deck and adds them to board array
 let x = 0;
     if(initial == true){
 //take a random index from the deck 12 times and add it to the board array
 let chosen;
-while(x < 12){
+while(x < 12 && board.length < 13){
     chosen = Math.floor((Math.random() * deck.length ))
     board.push(deck[chosen]) //random index values from 0 to 81
 deck.splice(chosen, 1) // removes one random object from the deck
@@ -596,6 +635,7 @@ for(let i=0; i < 3; i++){
 chosen = Math.floor((Math.random() * deck.length ))
 board.push(deck[chosen]) //random index values from 0 to 81
 deck.splice(chosen, 1) // removes one random object from the deck
+
 }
 
 }else{
@@ -645,10 +685,48 @@ function assignBoardContinued(){
     }
     } 
     console.log(noIDCards);
-    
-  
-};
+   
 
+};
+function checkSimilarity(int){
+ if (int == 3){
+identicalData +=1;
+
+console.log("identical set count" + identicalData);
+  }
+  else if (int == 2){
+balancedData +=1;
+console.log("balanced set count" + balancedData);
+  }else if(int == 1){
+singleData+=1;
+console.log("single set count" + singleData);
+  }else{
+    //every trait is different
+    rainbowData+=1;
+    console.log("raindbow set count" + rainbowData);
+  }
+myChart.data.datasets[0].data = [identicalData, balancedData, singleData, rainbowData];
+myChart.update();
+}
+function kindOfSet(child1, child2, child3, array1, array2, array3){
+  let similarityCounter = 0;
+  //compare color
+  if(haveSameClassPattern(child1,child2, child3)[1] ==true){
+    similarityCounter++;
+  }
+  if(haveSameClassShape(child1,child2, child3)[1] ==true){
+    similarityCounter ++;
+  }
+  if(haveSameColor(child1,child2, child3)[1] == true){
+similarityCounter ++;
+  }
+  if(haveSameNumber(array1,array2,array3)[1]==true){
+similarityCounter ++;
+  }
+  console.log(similarityCounter)
+  checkSimilarity(similarityCounter);
+ 
+}
 function removeValidSet(takenArr) {
   initial = false;
   for (let i = 0; i < takenArr.length; i++) {
@@ -676,7 +754,8 @@ function removeValidSet(takenArr) {
         cardNodeList[x].removeAttribute('id');
       }
     }
-    console.log(initial)
+    console.log(takenCards) // array of 3 divs
+    
   }
 //removes border from cards
   console.log("Updated board length: " + board.length);
@@ -684,8 +763,12 @@ function removeValidSet(takenArr) {
       selectedCards[z].style.border = 'none';
     }
   selectedCards = []; // resets the selected cards arr
- dealCards();
-  console.log("this is the board " , board);
+ if(board.length<12 && deck.length > 0 ){
+  dealCards();
+  console.log("this is the board " , board);}
+  else{
+assignBoardContinued();
+  }
 };
 
 function verifySet(){
@@ -696,19 +779,21 @@ const cardOneChildren =Array.from(selectedCards[1].children) // one two three;
 const cardTwoChildren =Array.from(selectedCards[2].children) // one two three;
 
 if (
-  haveSameClassShape(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0]) && // shape
-  haveSameClassPattern(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0])&&  //pattern
-  haveSameColor(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0])&& //color
-  haveSameNumber(cardZeroChildren,cardOneChildren,cardTwoChildren)) { // number
+  haveSameClassShape(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0])[0] && // shape
+  haveSameClassPattern(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0])[0]&&  //pattern
+  haveSameColor(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0])[0]&& //color
+  haveSameNumber(cardZeroChildren,cardOneChildren,cardTwoChildren)[0]) { // number
   console.log("This IS a set");
       points +=1;
       playerPointsSpanElement.innerText = points;
       setCounter += 3;
       foundCounterElement.innerText = setCounter;
+      validSound.play();
 
 for(let i=0; i< 3 ; i++){
 takenCards.push(selectedCards[i]) // adds valid set to taken cards array
   }
+  kindOfSet(cardZeroChildren[0],cardOneChildren[0],cardTwoChildren[0],cardZeroChildren,cardOneChildren,cardTwoChildren);
   removeValidSet(takenCards); // removes the taken cards from the board
 takenCards =[];
 //replace taken cards on the board
@@ -717,6 +802,7 @@ takenCards =[];
     console.log("this is NOT a set");
     points -=1;
     playerPointsSpanElement.innerText = points;
+    invalidSound.play();
     for( let x=0; x <selectedCards.length; x++){
       selectedCards[x].style.border = 'none';
     }
@@ -753,9 +839,12 @@ function haveSameClassShape(element1, element2, element3){
   const classShape2 = classList2[1];
   const classShape3 = classList3[1];
     // Check if the current class exists in the second element's class list
-    if ((classShape1 == classShape2 && classShape2== classShape3) || (classShape1 != classShape2 && classShape2!= classShape3 && classShape3!=classShape1)) {
-       return true// Found a common class
-    }else{
+    if ((classShape1 == classShape2 && classShape2== classShape3)) {
+       return [true, true]// Found a common class
+    }else if(classShape1 != classShape2 && classShape2!= classShape3 && classShape3!=classShape1){
+      return [true, false] // all different is the second value
+    }
+      else{
  return false// No common classes found
     }
   
@@ -768,8 +857,10 @@ function haveSameClassPattern(element1, element2, element3){
   const classPattern2 = classList2[2];
   const classPattern3 = classList3[2];
     // Check if the current class exists in the second element's class list
-    if ((classPattern1 == classPattern2 && classPattern2== classPattern3) || (classPattern1 != classPattern2 && classPattern2!= classPattern3 && classPattern3!=classPattern1)) {
-       return true// Found a common class
+    if (classPattern1 == classPattern2 && classPattern2== classPattern3) {
+       return [true, true]// Found a common class
+    }else if(classPattern1 != classPattern2 && classPattern2!= classPattern3 && classPattern3!=classPattern1){
+       return [true, false]
     }else{
  return false// No common classes found
     }
@@ -780,8 +871,10 @@ function haveSameColor(element1, element2, element3){
 const color1 = element1.style.getPropertyValue('--this-card-color');
 const color2 = element2.style.getPropertyValue('--this-card-color');
 const color3 = element3.style.getPropertyValue('--this-card-color');
-if ((color1 == color2 && color2 == color3) || (color1 != color2 && color2 != color3 && color3 != color1)){
-  return true
+if (color1 == color2 && color2 == color3){
+  return [true, true];
+}else if(color1 != color2 && color2 != color3 && color3 != color1){
+  return [true, false];
 }else{
   return false
 }
@@ -802,9 +895,12 @@ for (let x=0; x< 3 ; x++){
     totalDisplay3 +=1;
   }
 }
-if ((totalDisplay1 == totalDisplay2 && totalDisplay2 == totalDisplay3)||(totalDisplay1 != totalDisplay2 && totalDisplay2 != totalDisplay3 && totalDisplay3 != totalDisplay1)){
-  return true
-}else{
+if (totalDisplay1 == totalDisplay2 && totalDisplay2 == totalDisplay3){
+  return [true, true];
+}else if(totalDisplay1 != totalDisplay2 && totalDisplay2 != totalDisplay3 && totalDisplay3 != totalDisplay1){
+  return [true, false];
+}
+else{
   return false
 }
 }
@@ -864,7 +960,7 @@ for (let i = 0; i < leftEye.length; i++) {
 }
 
 // timer stuff
-const quitBtn = document.getElementById("quit");
+const quitBtn = document.querySelector("#quit");
 let isRunning = false;
 let secondsDisplay = document.querySelector("#seconds");
 let minutesDisplay = document.querySelector("#minutes");
@@ -902,24 +998,83 @@ hoursDisplay.innerText = formatted.hours
 function startTimer(){
 if (!isRunning){
   startTime =Date.now() - elapsedTime;
-  timerInterval = setInterval(updateDisplay, 10);}
+  timerInterval = setInterval(updateDisplay, 10);
+isRunning = true;}
 }
 // gotta fix the stopping of the timer
 function stopTimer(){
   if(isRunning){
-    timerInterval = null;
+    clearInterval(timerInterval);
     isRunning = false;
     console.log(isRunning)
   }
 }
 
+// chart stats stuff
 
+const myChart = new Chart(donughtChart,{
+  type: "doughnut",
+  data: {
+    labels: ["Almost identical Sets", "Balanced Sets", "Single Common Trait", "Rainbow"],
+    datasets: [
+      {
+        label: "Type of Set",
+        data: [0, 0, 0, 0],
+      }
+    ]
+  },
+  options:{
+    plugins:{
+      legend:{
+        display:false,
+      },
+    },
+  },
+});
+const lastChart = new Chart(endingChart,{
+  type: "doughnut",
+  data: {
+    labels: ["Almost identical Sets", "Balanced Sets", "Single Common Trait", "Rainbow"],
+    datasets: [
+      {
+        label: "Type of Set",
+        data: [0, 0, 0, 0],
+      }
+    ]
+  },
+  options:{
+    plugins:{
+      legend:{
+        display:false,
+      },
+    },
+  },
+});
   //function calls-----------------------------------------------
 
-startTimer();
+
 dealCards();
 addToSelectedCardsArr();
 googlyEyes();
- quitBtn.onclick = stopTimer;
- addCardsElement.onclick= dealCards;
-console.log(initial)
+quitBtn.addEventListener("click", quitting);
+
+ 
+ //start of add more cards to DOM
+ /*
+  addCardsElement.onclick= dealCards;
+    if(board.length ==15){
+      let currentGridAreas = getComputedStyle(gridContainerElement).gridTemplateAreas;
+      const newRowAreas = 'new1 new2 new3';
+  let gridAreasArray = currentGridAreas.match(/"([^"]+)"/g).map(r => r.replace(/"/g, '')); // gets quotes in the string that matches the regex value for quotations globally, then returns a new array that replaces every quotation with an empty string
+     gridAreasArray.push(newRowAreas);
+const newGridTemplateAreas = gridAreasArray.map(row => `"${row}"`).join('\n');
+gridContainerElement.style.gridTemplateAreas = newGridTemplateAreas;
+  console.log(newGridTemplateAreas);
+  console.log(board.length)
+}else{
+  gridContainerElement.style.gridTemplateAreas= currentGridAreas;
+  console.log(board.length)
+ 
+}
+
+*/

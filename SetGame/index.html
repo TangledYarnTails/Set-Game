@@ -7,28 +7,95 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
 </head>
 <body>
+    
+    <audio id="valid-sound">
+<source src="/audio/Bling.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+    </audio>
+    <audio id="invalid-sound">
+        <source src="/audio/Double Knock.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+     <audio id="finish-sound">
+        <source src="/audio/Blip Bleep.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    
+<div class="sound">
+    <p>&#x1F50A; Sound Up!</p>
+</div>
     <div class="logo">
         <h1>SET!</h1>
     </div>
     <div class="menu">
         <a>Practice</a>
-         <a>Online Versus</a>
-          <a>Play with AI</a>
+         <a id="soon">Coming soon</a>
+          <a id="soon">Coming Soon</a>
     </div>
+    <div class="popup-container">
+<dialog id="rules">
+    <div class="rule-text">
+        <h3>Rules</h3>
+       <p>Each card has:</p>
+       <ul>
+        <li>&#x1F537; Shape (pill, chevron diamond)</li>
+        <li> &#x1F3A8; Color (red, green, blue)</li>
+        <li> &#x1F522; Number (1, 2, or 3)</li>
+        <li>&#x1F58D; Shading (solid, striped, open)</li>
+       </ul>
+
+
+        <p>A SET is 3 cards where, for each feature, the cards are:
+</p>
+<ul>
+    <li>&#x1F449; all the same OR all different</li>
+<li>&#x274C; If two match and one doesn’t — not a set!</li>
+ <li> &#x270B; Click on the cards to take the set</li>
+ <li>&#x1F501; Keep going! Until you find all the sets!</li>
+<li> &#x1F3C1; Game ends when no more sets.</li>
+</ul>
+    </div>
+    <button id="go" type="button">Let's Go!</button>
+</dialog>
+<dialog id="game-over">
+    <div class="over-container">
+        <button id="retry">Retry?</button>
+        <h2>Total Points: <span id="total-points">0</span></h2>
+    <p>Time Taken: <span id="finished-time">0</span></p>
+    <p>Sets Found: <span id="sets-found">0</span></p>
+    
+    <p>Types of Sets:</p>
+   
+
+    
+    </div>
+     <div class="chart-container">
+                 <canvas id="ending-chart"></canvas>
+            </div>
+</dialog>
+    </div>
+    
     <div class="game-wrapper">
         <div class="stats">
-            <button id="add">Add More</button>
+            <!--<button id="add">Add More</button>-->
             <h2><span id="hours">00</span> : <span id="minutes">00</span> : <span id="seconds">00</span></h2>
             <h2>Points: <span id="points">0</span></h2>
             <h2>Stats</h2>
-            <p>Sets found: <span id="found">0</span>/81</p>
+            <p>Cards found: <span id="found">0</span>/81</p>
             <p>Types of Sets</p>
-            <p>put a pie chart here</p>
+            <div class="chart-container">
+                <canvas id="doughnut-chart"></canvas>
+            </div>
+            
+            
             <button id="quit">Quit</button>
         </div>
-<div class="board-wrapper">
+<div class="board-wrapper" style="display: grid;
+   grid-template-areas:
+   'a b c d' 'e f g h' 'i j k l';">
     <div class="spot a">
         <div class="card">
             <div class="one">
@@ -438,9 +505,10 @@
             </div>
   </div>
     </div>
+ 
 </div>
   </div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script> 
 </body>
 </html>

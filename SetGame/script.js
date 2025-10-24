@@ -590,7 +590,12 @@ const endingChart = document.querySelector("#ending-chart");
 const validSound = document.getElementById("valid-sound");
 const invalidSound = document.getElementById("invalid-sound");
 const finishSound = document.getElementById("finish-sound");
-
+//quit screen elements 
+let secondsDisplayTotal = document.querySelector("#Tseconds");
+let minutesDisplayTotal = document.querySelector("#Tminutes");
+let hoursDisplayTotal = document.querySelector("#Thours");
+const totalPoints = document.getElementById("total-points");
+const setsFound = document.getElementById("sets-found");
 // rules popup stuff
 const ruleDialog = document.getElementById("rules");
 const goButton = document.getElementById("go");
@@ -605,6 +610,9 @@ function closeRules(){
 //quit button function
 function quitting(){
   stopTimer();
+  totalPoints.innerText = points;
+
+setsFound.innerText = setCounter / 3 ;
   finishSound.play();
   lastChart.data.datasets[0].data =[identicalData, balancedData, singleData, rainbowData];
 lastChart.update();
@@ -657,6 +665,7 @@ assignBoardContinued();
      gridAreasArray.push(newRowAreas);
 const newGridTemplateAreas = gridAreasArray.map(row => `"${row}"`).join('\n');
 gridContainerElement.style.gridTemplateAreas = newGridTemplateAreas;
+gridContainerElement.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
 // display the 3 spots
 
 newSpot1.style.display = "flex";
@@ -1076,6 +1085,7 @@ secondsDisplay.innerText = formatted.seconds;
 minutesDisplay.innerText = formatted.minutes;
 hoursDisplay.innerText = formatted.hours 
 
+
 }
 function startTimer(){
 if (!isRunning){
@@ -1136,6 +1146,7 @@ dealCards();
 initial =false;
 addToSelectedCardsArr();
 googlyEyes();
+
 quitBtn.addEventListener("click", quitting);
 
  //start of add more cards to DOM

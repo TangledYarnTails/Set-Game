@@ -137,6 +137,15 @@ z-index: 2;
 .l{
     grid-area: l;
 }
+.m{
+display: none;
+}
+.n{
+display: none;
+}
+.o{
+display: none;
+}
 .one, .two , .three {
     display: none;
 }

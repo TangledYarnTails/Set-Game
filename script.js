@@ -573,8 +573,11 @@ const cardNodeList = document.querySelectorAll(".card"); //get all card elements
 const playerPointsSpanElement = document.getElementById("points");
 const timerSpanElement = document.getElementById("timer");
 const foundCounterElement = document.getElementById("found");
-const addCardsElement = document.getElementById("add");
+const addCardsElement = document.querySelector("#add-cards");
 const gridContainerElement = document.querySelector(".board-wrapper");
+const newSpot1 = document.querySelector(".m");
+const newSpot2 = document.querySelector(".n");
+const newSpot3 = document.querySelector(".o");
 //stats variables
 let setCounter = 0;
 const donughtChart = document.querySelector("#doughnut-chart");
@@ -587,7 +590,12 @@ const endingChart = document.querySelector("#ending-chart");
 const validSound = document.getElementById("valid-sound");
 const invalidSound = document.getElementById("invalid-sound");
 const finishSound = document.getElementById("finish-sound");
-
+//quit screen elements 
+let secondsDisplayTotal = document.querySelector("#Tseconds");
+let minutesDisplayTotal = document.querySelector("#Tminutes");
+let hoursDisplayTotal = document.querySelector("#Thours");
+const totalPoints = document.getElementById("total-points");
+const setsFound = document.getElementById("sets-found");
 // rules popup stuff
 const ruleDialog = document.getElementById("rules");
 const goButton = document.getElementById("go");
@@ -602,6 +610,9 @@ function closeRules(){
 //quit button function
 function quitting(){
   stopTimer();
+  totalPoints.innerText = points;
+
+setsFound.innerText = setCounter / 3 ;
   finishSound.play();
   lastChart.data.datasets[0].data =[identicalData, balancedData, singleData, rainbowData];
 lastChart.update();
@@ -620,11 +631,12 @@ let x = 0;
     if(initial == true){
 //take a random index from the deck 12 times and add it to the board array
 let chosen;
-while(x < 12 && board.length < 13){
+while(x < 12){
     chosen = Math.floor((Math.random() * deck.length ))
     board.push(deck[chosen]) //random index values from 0 to 81
 deck.splice(chosen, 1) // removes one random object from the deck
 assignBoardInitial();
+;
 x++;
 }
 
@@ -645,6 +657,23 @@ deck.splice(chosen, 1) // removes one random object from the deck
 console.log("Currently on the board: " , board)
 assignBoardContinued();
 }
+  if(board.length ==15){
+    //adds a new row with 3 cols
+      let currentGridAreas = getComputedStyle(gridContainerElement).gridTemplateAreas;
+      const newRowAreas = 'm n o';
+  let gridAreasArray = currentGridAreas.match(/"([^"]+)"/g).map(r => r.replace(/"/g, '')); // gets quotes in the string that matches the regex value for quotations globally, then returns a new array that replaces every quotation with an empty string
+     gridAreasArray.push(newRowAreas);
+const newGridTemplateAreas = gridAreasArray.map(row => `"${row}"`).join('\n');
+gridContainerElement.style.gridTemplateAreas = newGridTemplateAreas;
+gridContainerElement.style.gridTemplateRows = '1fr 1fr 1fr 1fr';
+// display the 3 spots
+
+newSpot1.style.display = "flex";
+newSpot2.style.display = "flex";
+newSpot3.style.display = "flex";
+  console.log(newGridTemplateAreas);
+  console.log(board.length)
+}
 };
 
 function assignBoardInitial(){ //displays cards on html
@@ -662,7 +691,9 @@ x++;
     }
     x= 0;
 }   
+
   }
+ 
 };
 
 function assignBoardContinued(){
@@ -728,18 +759,17 @@ similarityCounter ++;
  
 }
 function removeValidSet(takenArr) {
-  initial = false;
+  
+  // First, collect all the card names to remove
+  const cardNamesToRemove = [];
+  
   for (let i = 0; i < takenArr.length; i++) {
     const takenCardId = takenArr[i].id;
-
-    // Find the index of the matching card in the board array
-    const index = board.findIndex(card => card.name === takenCardId);
-    if (index !== -1) {
-      board.splice(index, 1);
-    }
+    cardNamesToRemove.push(takenCardId);
 
     // Find the matching DOM card and remove styles
     for (let x = 0; x < cardNodeList.length; x++) {
+      
       if (cardNodeList[x].id === takenCardId) {
         const childrenArr = Array.from(cardNodeList[x].children);
 
@@ -754,23 +784,84 @@ function removeValidSet(takenArr) {
         cardNodeList[x].removeAttribute('id');
       }
     }
-    console.log(takenCards) // array of 3 divs
-    
   }
-//removes border from cards
-  console.log("Updated board length: " + board.length);
-  for( let z=0; z <selectedCards.length; z++){
-      selectedCards[z].style.border = 'none';
+  
+  // NOW remove all the cards from the board array at once
+  for (let i = 0; i < cardNamesToRemove.length; i++) {
+    const index = board.findIndex(card => card.name === cardNamesToRemove[i]);
+    if (index !== -1) {
+      board.splice(index, 1);
     }
-  selectedCards = []; // resets the selected cards arr
- if(board.length<12 && deck.length > 0 ){
-  dealCards();
-  console.log("this is the board " , board);}
-  else{
-assignBoardContinued();
   }
-};
 
+  // Remove border from selected cards
+  for(let z = 0; z < selectedCards.length; z++){
+    selectedCards[z].style.border = 'none';
+  }
+  selectedCards = []; // resets the selected cards arr
+  
+  takenCards = [];
+
+  // Deal new cards BEFORE reorganizing (if board is less than 12)
+  if(board.length < 12 && deck.length > 0){
+    let cardsNeeded = Math.min(3, 12 - board.length);
+    for(let i = 0; i < cardsNeeded; i++){
+      let chosen = Math.floor((Math.random() * deck.length));
+      board.push(deck[chosen]);
+      deck.splice(chosen, 1);
+    }
+  }
+
+  // Move cards to fill empty spots
+  reorganizeBoard();
+}
+
+function reorganizeBoard() {
+  // Clear all card displays first
+  for(let i = 0; i < cardNodeList.length; i++) {
+    const childrenArr = Array.from(cardNodeList[i].children);
+    for(let y = 0; y < childrenArr.length; y++) {
+      const classesToRemove = ['rhombus', 'pill', 'chevron', 'solid', 'striped', 'outline'];
+      for (const className of classesToRemove) {
+        childrenArr[y].classList.remove(className);
+      }
+      childrenArr[y].style.display = 'none';
+    }
+    cardNodeList[i].removeAttribute('id');
+  }
+
+  // Redistribute all board cards to the DOM elements
+  for(let i = 0; i < board.length; i++) {
+    const card = board[i];
+    const domCard = cardNodeList[i];
+    
+    domCard.id = card.name;
+    const childArray = Array.from(domCard.children);
+    
+    for(let j = 0; j < card.number; j++) {
+      childArray[j].style.display = "flex";
+      childArray[j].classList.add(card.shape, card.pattern);
+      childArray[j].style.setProperty('--this-card-color', `var(--${card.color})`);
+    }
+  }
+
+  // Adjust grid layout based on board length
+  if(board.length <= 12) {
+    gridContainerElement.style.gridTemplateAreas = `
+      'a b c d'
+      'e f g h'
+      'i j k l'
+    `;
+    newSpot1.style.display = "none";
+    newSpot2.style.display = "none";
+    newSpot3.style.display = "none";
+  } else {
+    // Keep 5th row visible if we have 13-15 cards
+    newSpot1.style.display = "flex";
+    newSpot2.style.display = "flex";
+    newSpot3.style.display = "flex";
+  }
+}
 function verifySet(){
   
 //if two share a characteristic and the last one does not then it is not a set
@@ -994,6 +1085,7 @@ secondsDisplay.innerText = formatted.seconds;
 minutesDisplay.innerText = formatted.minutes;
 hoursDisplay.innerText = formatted.hours 
 
+
 }
 function startTimer(){
 if (!isRunning){
@@ -1001,7 +1093,7 @@ if (!isRunning){
   timerInterval = setInterval(updateDisplay, 10);
 isRunning = true;}
 }
-// gotta fix the stopping of the timer
+
 function stopTimer(){
   if(isRunning){
     clearInterval(timerInterval);
@@ -1011,7 +1103,6 @@ function stopTimer(){
 }
 
 // chart stats stuff
-
 const myChart = new Chart(donughtChart,{
   type: "doughnut",
   data: {
@@ -1051,30 +1142,15 @@ const lastChart = new Chart(endingChart,{
   },
 });
   //function calls-----------------------------------------------
-
-
 dealCards();
+initial =false;
 addToSelectedCardsArr();
 googlyEyes();
+
 quitBtn.addEventListener("click", quitting);
 
- 
  //start of add more cards to DOM
- /*
-  addCardsElement.onclick= dealCards;
-    if(board.length ==15){
-      let currentGridAreas = getComputedStyle(gridContainerElement).gridTemplateAreas;
-      const newRowAreas = 'new1 new2 new3';
-  let gridAreasArray = currentGridAreas.match(/"([^"]+)"/g).map(r => r.replace(/"/g, '')); // gets quotes in the string that matches the regex value for quotations globally, then returns a new array that replaces every quotation with an empty string
-     gridAreasArray.push(newRowAreas);
-const newGridTemplateAreas = gridAreasArray.map(row => `"${row}"`).join('\n');
-gridContainerElement.style.gridTemplateAreas = newGridTemplateAreas;
-  console.log(newGridTemplateAreas);
-  console.log(board.length)
-}else{
-  gridContainerElement.style.gridTemplateAreas= currentGridAreas;
-  console.log(board.length)
  
-}
+  addCardsElement.addEventListener("click", dealCards);
+  
 
-*/

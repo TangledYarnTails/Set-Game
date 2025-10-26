@@ -404,6 +404,6 @@ button{
    
 }
 html{
-    overflow:auto;
+    overflow: visible;
 }
 }

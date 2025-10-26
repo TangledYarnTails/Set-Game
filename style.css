@@ -39,7 +39,6 @@ body{
 .menu{
     max-width: 100vw;
     height: 10vh;
-    
     margin-bottom: 1%;
     display: flex;
     justify-content: center;
@@ -47,8 +46,6 @@ body{
     border-radius: 80px;
     box-shadow: -30px -30px 50px -30px var(--highlight) inset,
     30px 30px 50px -55px var(--drop-shadow) inset;
-    
-    
 }
 a{
     font-family: "Kodchasan", sans-serif;
@@ -57,12 +54,9 @@ a{
   font-style: normal;
     padding: 20px;
     cursor:pointer;
-
 }
 .game-wrapper{
-    display: flex;
-    
-   
+    display: flex; 
 }
 .stats{
     width: 15vw;
@@ -80,11 +74,9 @@ a{
 }
 
 .board-wrapper{
- 
    width: 80vw;
    height: 80vh;
    padding: 10px;
-   
    grid-gap: 10px;
    grid-template-columns: 1fr 1fr 1fr 1fr;
    grid-template-rows: 1fr 1fr 1fr;
@@ -92,8 +84,6 @@ border-radius: 30px;
  box-shadow: -30px -30px 48px -30px var(--highlight),
     20px 30px 48px -35px var(--drop-shadow);
 z-index: 2;
-
-
 }
 
 .spot{
@@ -326,4 +316,92 @@ button:hover{
 canvas{
     width:200px;
     z-index: 2;
+}
+
+@media screen and (max-height: 800px) and (orientation: landscape) {
+    .logo{
+  font-size: 10px;
+  z-index:20;
+}
+    .board-wrapper{
+   width: 85vw;
+   height: 90vh;
+   padding: 5px;
+   grid-gap: 5px;
+    }
+    .rhombus{
+    width: 40px;
+	height: 40px;
+    margin: 10px;
+}
+
+.pill{
+    width: 40px;
+	height: 70px;
+    margin: 5px;
+}
+.pill .eye-wrapper{
+     width: 60px;
+    height: 30px;
+    
+}
+.rhombus .eye-wrapper{
+    width: 60px;
+    height: 30px;
+    transform: skew(-10deg, -10deg) rotate(-45deg);
+   
+}
+.chevron{
+    width: 50px;
+  height: 70px;
+}
+
+
+.stats{
+    width: 15vw;
+    height: 90vh;
+   
+     box-shadow: none;
+     margin: 0px;
+}
+.stats > h2{
+    margin: 0;
+    font-size: 12px;
+}
+.stats > p{
+    margin: 0;
+    font-size:12px;
+}
+.stats > button{
+    margin: 3px;;
+}
+canvas{
+    height:80px;
+    width: 80px;
+    z-index: 2;
+    margin: 0;
+}
+#sound-text{
+   display: none;
+}
+.sound{
+    left: 15px;
+}
+button{
+    height: 30px;
+    padding:5px;
+    font-size: 15px;
+}
+.eye{
+    width:20px;
+    height: 20px;
+   
+}
+
+.pupil{
+    width: 10px;
+    height: 10px;
+   
+}
+
 }

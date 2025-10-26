@@ -1027,7 +1027,7 @@ function updatePupil(eye, pupil){
  
   // calculate the eye radius and max pupil movement
       const eyeRadius = eyeRect.width / 2; // because it should be a square 
-      const pupilRadius = 7; // Half of the pupil size (~15px/2)
+      const pupilRadius = pupil.getBoundingClientRect().width / 2; // Half of the pupil size (~15px/2 = 7)
       const maxMovement = eyeRadius - pupilRadius - 3; // padding of 3px from the eye
      
       //apply the max movement constraint

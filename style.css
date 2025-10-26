@@ -381,11 +381,10 @@ canvas{
     z-index: 2;
     margin: 0;
 }
-#sound-text{
-   display: none;
-}
+
 .sound{
-    left: 15px;
+   
+    display: none;
 }
 button{
     height: 30px;

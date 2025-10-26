@@ -403,5 +403,7 @@ button{
     height: 10px;
    
 }
-
+html{
+    overflow:auto;
+}
 }
